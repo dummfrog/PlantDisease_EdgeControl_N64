@@ -1,0 +1,16 @@
+#ifndef __BOARD_CONFIG_H
+#define __BOARD_CONFIG_H
+
+#include "main.h"
+
+#define RELAY_ACTIVE_LOW   1
+
+#define RELAY1_GPIO_PORT   GPIOF
+#define RELAY1_GPIO_PIN    GPIO_PIN_11
+#define RELAY1_GPIO_CLK_ENABLE()  __HAL_RCC_GPIOF_CLK_ENABLE()
+
+#define RELAY2_GPIO_PORT   GPIOF
+#define RELAY2_GPIO_PIN    GPIO_PIN_12
+#define RELAY2_GPIO_CLK_ENABLE()  __HAL_RCC_GPIOF_CLK_ENABLE()
+
+#endif /* __BOARD_CONFIG_H */
