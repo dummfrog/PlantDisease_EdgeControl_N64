@@ -8,12 +8,6 @@
 #define LOG_UPLOAD_TIMESTAMP        "2026-06-23T20:30:00+08:00"
 #define LOG_UPLOAD_DISEASE          "Leaf_Spot"
 #define LOG_UPLOAD_DISEASE_CN       "YeBanBing"
-#define LOG_UPLOAD_TEMPERATURE_X10  286U
-#define LOG_UPLOAD_HUMIDITY_X10     782U
-#define LOG_UPLOAD_LIGHT_LUX        13500U
-#define LOG_UPLOAD_SOIL_MOISTURE    42U
-#define LOG_UPLOAD_LIQUID_LEVEL     "OK"
-#define LOG_UPLOAD_CURRENT_MA       680U
 #define LOG_UPLOAD_ALARM            "NONE"
 
 static const char *LogUpload_GetRiskLevel(float confidence)
@@ -36,23 +30,30 @@ void LogUpload_Init(void)
   printf("[LOG] init ok\r\n");
 }
 
-void LogUpload_PrintJson(const AIResult_t *ai, const Prescription_t *prescription, uint8_t action_suppressed)
+void LogUpload_PrintJson(const AIResult_t *ai,
+                         const Prescription_t *prescription,
+                         uint8_t action_suppressed,
+                         const SensorData_t *sensor)
 {
   char json[768];
   uint32_t confidence_milli;
+  uint32_t temperature_x10;
+  uint32_t humidity_x10;
   uint32_t pump_duration_s;
   uint32_t fan_duration_s;
   const char *pump_action;
   const char *fan_action;
   int written;
 
-  if ((ai == NULL) || (prescription == NULL))
+  if ((ai == NULL) || (prescription == NULL) || (sensor == NULL))
   {
     printf("[LOG] invalid input\r\n");
     return;
   }
 
   confidence_milli = (uint32_t)((ai->confidence * 1000.0f) + 0.5f);
+  temperature_x10 = (uint32_t)((sensor->temperature_c * 10.0f) + 0.5f);
+  humidity_x10 = (uint32_t)((sensor->humidity_percent * 10.0f) + 0.5f);
   pump_action = "OFF";
   fan_action = "OFF";
 
@@ -91,18 +92,18 @@ void LogUpload_PrintJson(const AIResult_t *ai, const Prescription_t *prescriptio
                      (unsigned long)(confidence_milli / 1000U),
                      (unsigned long)(confidence_milli % 1000U),
                      LogUpload_GetRiskLevel(ai->confidence),
-                     (unsigned long)(LOG_UPLOAD_TEMPERATURE_X10 / 10U),
-                     (unsigned long)(LOG_UPLOAD_TEMPERATURE_X10 % 10U),
-                     (unsigned long)(LOG_UPLOAD_HUMIDITY_X10 / 10U),
-                     (unsigned long)(LOG_UPLOAD_HUMIDITY_X10 % 10U),
-                     (unsigned long)LOG_UPLOAD_LIGHT_LUX,
-                     (unsigned long)LOG_UPLOAD_SOIL_MOISTURE,
-                     LOG_UPLOAD_LIQUID_LEVEL,
+                     (unsigned long)(temperature_x10 / 10U),
+                     (unsigned long)(temperature_x10 % 10U),
+                     (unsigned long)(humidity_x10 / 10U),
+                     (unsigned long)(humidity_x10 % 10U),
+                     (unsigned long)sensor->light_lux,
+                     (unsigned long)sensor->soil_moisture_percent,
+                     sensor->liquid_level,
                      pump_action,
                      fan_action,
                      (unsigned long)pump_duration_s,
                      (unsigned long)fan_duration_s,
-                     (unsigned long)LOG_UPLOAD_CURRENT_MA,
+                     (unsigned long)sensor->current_ma,
                      LOG_UPLOAD_ALARM);
 
   if ((written < 0) || ((uint32_t)written >= sizeof(json)))

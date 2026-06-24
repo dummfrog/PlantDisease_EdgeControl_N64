@@ -1,5 +1,6 @@
 #include "sensor.h"
 
+#include "bh1750.h"
 #include "main.h"
 #include <stdio.h>
 
@@ -9,6 +10,7 @@ void Sensor_Init(void)
 {
   printf("[SENSOR] init ok\r\n");
   Sensor_I2CScan();
+  (void)BH1750_Init();
 }
 
 void Sensor_Update(SensorData_t *data)
@@ -21,7 +23,11 @@ void Sensor_Update(SensorData_t *data)
   data->temperature_c = 28.6f;
   data->humidity_percent = 78.2f;
   data->pressure_hpa = 1013.2f;
-  data->light_lux = 13500U;
+  if (BH1750_ReadLux(&data->light_lux) == 0U)
+  {
+    data->light_lux = 13500U;
+    printf("[BH1750] read failed, use mock light\r\n");
+  }
   data->soil_moisture_percent = 42U;
   (void)snprintf(data->liquid_level, sizeof(data->liquid_level), "OK");
   data->current_ma = 680U;

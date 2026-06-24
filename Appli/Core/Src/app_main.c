@@ -175,7 +175,7 @@ static void App_Business_Process(uint32_t now_ms)
     action_suppressed = (App_ActionRequestAllowed(ai.disease_id, now_ms) == 0U) ? 1U : 0U;
   }
 
-  LogUpload_PrintJson(&ai, prescription, action_suppressed);
+  LogUpload_PrintJson(&ai, prescription, action_suppressed, &app_sensor_data);
 }
 #endif
 
