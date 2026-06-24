@@ -64,10 +64,11 @@ void Relay_Init(void)
   HAL_GPIO_WritePin(RELAY2_GPIO_PORT, RELAY2_GPIO_PIN, RELAY_OFF_STATE);
   relay_state_ch1 = 0U;
   relay_state_ch2 = 0U;
+  printf("[RELAY] predrive off: CH1=SET CH2=SET\r\n");
 
   GPIO_InitStruct.Pin = RELAY1_GPIO_PIN;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(RELAY1_GPIO_PORT, &GPIO_InitStruct);
 

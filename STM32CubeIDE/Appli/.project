@@ -136,6 +136,16 @@
 			<locationURI>PARENT-2-PROJECT_LOC/Appli/Core/Src/app_main.c</locationURI>
 		</link>
 		<link>
+			<name>Application/User/Core/ai_result.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/Appli/Core/Src/ai_result.c</locationURI>
+		</link>
+		<link>
+			<name>Application/User/Core/ai_result.h</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/Appli/Core/Inc/ai_result.h</locationURI>
+		</link>
+		<link>
 			<name>Application/User/Core/app_uart.c</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/Appli/Core/Src/app_uart.c</locationURI>
@@ -149,6 +159,71 @@
 			<name>Application/User/Core/buzzer.h</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/Appli/Core/Inc/buzzer.h</locationURI>
+		</link>
+		<link>
+			<name>Application/User/Core/fan.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/Appli/Core/Src/fan.c</locationURI>
+		</link>
+		<link>
+			<name>Application/User/Core/fan.h</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/Appli/Core/Inc/fan.h</locationURI>
+		</link>
+		<link>
+			<name>Application/User/Core/pump.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/Appli/Core/Src/pump.c</locationURI>
+		</link>
+		<link>
+			<name>Application/User/Core/pump.h</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/Appli/Core/Inc/pump.h</locationURI>
+		</link>
+		<link>
+			<name>Application/User/Core/log_upload.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/Appli/Core/Src/log_upload.c</locationURI>
+		</link>
+		<link>
+			<name>Application/User/Core/log_upload.h</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/Appli/Core/Inc/log_upload.h</locationURI>
+		</link>
+		<link>
+			<name>Application/User/Core/prescription.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/Appli/Core/Src/prescription.c</locationURI>
+		</link>
+		<link>
+			<name>Application/User/Core/prescription.h</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/Appli/Core/Inc/prescription.h</locationURI>
+		</link>
+		<link>
+			<name>Application/User/Core/sensor.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/Appli/Core/Src/sensor.c</locationURI>
+		</link>
+		<link>
+			<name>Application/User/Core/sensor.h</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/Appli/Core/Inc/sensor.h</locationURI>
+		</link>
+		<link>
+			<name>Application/User/Core/board_config.h</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/Appli/Core/Inc/board_config.h</locationURI>
+		</link>
+		<link>
+			<name>Application/User/Core/relay.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/Appli/Core/Src/relay.c</locationURI>
+		</link>
+		<link>
+			<name>Application/User/Core/relay.h</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/Appli/Core/Inc/relay.h</locationURI>
 		</link>
 		<link>
 			<name>Application/User/Core/secure_nsc.c</name>
