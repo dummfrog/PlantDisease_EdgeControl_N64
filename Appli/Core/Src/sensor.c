@@ -1,8 +1,9 @@
 #include "sensor.h"
 
+#include "main.h"
 #include <stdio.h>
 
-#define SENSOR_I2C_HANDLE_AVAILABLE  0
+extern I2C_HandleTypeDef hi2c2;
 
 void Sensor_Init(void)
 {
@@ -59,9 +60,24 @@ void Sensor_Print(const SensorData_t *data)
 
 void Sensor_I2CScan(void)
 {
-#if SENSOR_I2C_HANDLE_AVAILABLE
-  /* TODO: Enable when CubeMX adds an I2C handle and HAL_I2C_MODULE_ENABLED. */
-#else
-  printf("[SENSOR] no I2C handle found, I2C scan skipped\r\n");
-#endif
+  uint8_t address;
+  uint8_t found_count = 0U;
+
+  printf("[I2C_SCAN] start\r\n");
+
+  for (address = 0x03U; address <= 0x77U; address++)
+  {
+    if (HAL_I2C_IsDeviceReady(&hi2c2, (uint16_t)(address << 1U), 2U, 10U) == HAL_OK)
+    {
+      printf("[I2C_SCAN] found device at 0x%02X\r\n", address);
+      found_count++;
+    }
+  }
+
+  if (found_count == 0U)
+  {
+    printf("[I2C_SCAN] no device found\r\n");
+  }
+
+  printf("[I2C_SCAN] done\r\n");
 }

@@ -32,6 +32,20 @@
 
 static SensorData_t app_sensor_data;
 
+static void App_Sensor_Process(uint32_t now_ms)
+{
+  static uint32_t last_sensor_ms = 0U;
+
+  if ((now_ms - last_sensor_ms) < APP_SENSOR_INTERVAL_MS)
+  {
+    return;
+  }
+
+  last_sensor_ms = now_ms;
+  Sensor_Update(&app_sensor_data);
+  Sensor_Print(&app_sensor_data);
+}
+
 #if FAN_LOAD_TEST_ENABLE
 static void App_FanLoadTest_Process(uint32_t now_ms)
 {
@@ -161,23 +175,9 @@ static void App_Business_Process(uint32_t now_ms)
     action_suppressed = (App_ActionRequestAllowed(ai.disease_id, now_ms) == 0U) ? 1U : 0U;
   }
 
-  LogUpload_PrintJson(&ai, prescription, action_suppressed, &app_sensor_data);
+  LogUpload_PrintJson(&ai, prescription, action_suppressed);
 }
 #endif
-
-static void App_Sensor_Process(uint32_t now_ms)
-{
-  static uint32_t last_sensor_ms = 0U;
-
-  if ((now_ms - last_sensor_ms) < APP_SENSOR_INTERVAL_MS)
-  {
-    return;
-  }
-
-  last_sensor_ms = now_ms;
-  Sensor_Update(&app_sensor_data);
-  Sensor_Print(&app_sensor_data);
-}
 
 void App_Init(void)
 {

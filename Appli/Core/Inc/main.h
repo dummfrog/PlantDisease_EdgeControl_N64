@@ -77,6 +77,10 @@ void MX_XSPIM_Init(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define I2C2_SDA_Pin GPIO_PIN_4
+#define I2C2_SDA_GPIO_Port GPIOD
+#define I2C2_SCL_Pin GPIO_PIN_14
+#define I2C2_SCL_GPIO_Port GPIOD
 
 /* USER CODE BEGIN Private defines */
 

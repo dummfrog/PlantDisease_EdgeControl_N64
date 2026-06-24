@@ -7,13 +7,9 @@ extern "C" {
 
 #include "ai_result.h"
 #include "prescription.h"
-#include "sensor.h"
 
 void LogUpload_Init(void);
-void LogUpload_PrintJson(const AIResult_t *ai,
-                         const Prescription_t *prescription,
-                         uint8_t action_suppressed,
-                         const SensorData_t *sensor_data);
+void LogUpload_PrintJson(const AIResult_t *ai, const Prescription_t *prescription, uint8_t action_suppressed);
 
 #ifdef __cplusplus
 }
