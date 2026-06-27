@@ -166,6 +166,16 @@
 			<locationURI>PARENT-2-PROJECT_LOC/Appli/Core/Inc/bh1750.h</locationURI>
 		</link>
 		<link>
+			<name>Application/User/Core/bmp280.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/Appli/Core/Src/bmp280.c</locationURI>
+		</link>
+		<link>
+			<name>Application/User/Core/bmp280.h</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/Appli/Core/Inc/bmp280.h</locationURI>
+		</link>
+		<link>
 			<name>Application/User/Core/app_uart.c</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/Appli/Core/Src/app_uart.c</locationURI>

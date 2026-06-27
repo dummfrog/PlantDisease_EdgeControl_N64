@@ -1,6 +1,7 @@
 #include "sensor.h"
 
 #include "bh1750.h"
+#include "bmp280.h"
 #include "main.h"
 #include <stdio.h>
 
@@ -11,10 +12,13 @@ void Sensor_Init(void)
   printf("[SENSOR] init ok\r\n");
   Sensor_I2CScan();
   (void)BH1750_Init();
+  (void)BMP280_Init();
 }
 
 void Sensor_Update(SensorData_t *data)
 {
+  uint8_t environment_read_ok;
+
   if (data == NULL)
   {
     return;
@@ -23,6 +27,19 @@ void Sensor_Update(SensorData_t *data)
   data->temperature_c = 28.6f;
   data->humidity_percent = 78.2f;
   data->pressure_hpa = 1013.2f;
+  environment_read_ok = BMP280_Read(&data->temperature_c, &data->pressure_hpa);
+  if (environment_read_ok == 0U)
+  {
+    data->temperature_c = 28.6f;
+    data->pressure_hpa = 1013.2f;
+    printf("[BMP/BME280] read failed, use mock env\r\n");
+  }
+  else if ((BMP280_IsBME280() != 0U) &&
+           (BME280_ReadHumidity(&data->humidity_percent) == 0U))
+  {
+    data->humidity_percent = 78.2f;
+    printf("[BME280] humidity read failed, use mock humidity\r\n");
+  }
   if (BH1750_ReadLux(&data->light_lux) == 0U)
   {
     data->light_lux = 13500U;
