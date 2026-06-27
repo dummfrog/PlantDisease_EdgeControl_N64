@@ -176,6 +176,16 @@
 			<locationURI>PARENT-2-PROJECT_LOC/Appli/Core/Inc/bmp280.h</locationURI>
 		</link>
 		<link>
+			<name>Application/User/Core/ds3231.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/Appli/Core/Src/ds3231.c</locationURI>
+		</link>
+		<link>
+			<name>Application/User/Core/ds3231.h</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/Appli/Core/Inc/ds3231.h</locationURI>
+		</link>
+		<link>
 			<name>Application/User/Core/app_uart.c</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/Appli/Core/Src/app_uart.c</locationURI>

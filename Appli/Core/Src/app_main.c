@@ -3,6 +3,7 @@
 #include "ai_result.h"
 #include "app_uart.h"
 #include "buzzer.h"
+#include "ds3231.h"
 #include "fan.h"
 #include "log_upload.h"
 #include "main.h"
@@ -193,6 +194,7 @@ void App_Init(void)
   Prescription_Init();
   LogUpload_Init();
   Sensor_Init();
+  (void)DS3231_Init();
 }
 
 void App_Loop(void)
