@@ -2,6 +2,7 @@
 
 #include "bh1750.h"
 #include "bmp280.h"
+#include "ina219.h"
 #include "main.h"
 #include <stdio.h>
 
@@ -13,6 +14,7 @@ void Sensor_Init(void)
   Sensor_I2CScan();
   (void)BH1750_Init();
   (void)BMP280_Init();
+  (void)INA219_Init();
 }
 
 void Sensor_Update(SensorData_t *data)
@@ -48,6 +50,11 @@ void Sensor_Update(SensorData_t *data)
   data->soil_moisture_percent = 42U;
   (void)snprintf(data->liquid_level, sizeof(data->liquid_level), "OK");
   data->current_ma = 680U;
+  if (INA219_ReadCurrentMa(&data->current_ma) == 0U)
+  {
+    data->current_ma = 680U;
+    printf("[INA219] read failed, use mock current\r\n");
+  }
   data->rain_detected = 0U;
 }
 

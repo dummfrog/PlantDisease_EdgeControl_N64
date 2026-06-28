@@ -31,6 +31,8 @@
 #define PUMP_LOAD_TEST_DELAY_MS  3000U
 #define PUMP_LOAD_TEST_RUN_MS    3000U
 
+#define INA219_PUMP_CURRENT_TEST_ENABLE  0
+
 static SensorData_t app_sensor_data;
 
 static void App_Sensor_Process(uint32_t now_ms)
