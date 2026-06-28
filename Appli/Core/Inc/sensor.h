@@ -22,7 +22,7 @@ typedef struct
 void Sensor_Init(void);
 void Sensor_Update(SensorData_t *data);
 void Sensor_Print(const SensorData_t *data);
-void Sensor_I2CScan(void);
+uint8_t Sensor_I2CScan(void);
 
 #ifdef __cplusplus
 }

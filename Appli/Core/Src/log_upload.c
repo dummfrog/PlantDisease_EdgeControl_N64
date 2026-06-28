@@ -1,5 +1,6 @@
 #include "log_upload.h"
 
+#include "app_selftest.h"
 #include "ds3231.h"
 #include "main.h"
 #include <stdio.h>
@@ -37,6 +38,7 @@ void LogUpload_PrintJson(const AIResult_t *ai,
                          const SensorData_t *sensor)
 {
   char json[768];
+  char sensor_status[64];
   char timestamp[32];
   DS3231_Time_t rtc_time;
   uint32_t confidence_milli;
@@ -61,6 +63,7 @@ void LogUpload_PrintJson(const AIResult_t *ai,
   pump_action = "OFF";
   fan_action = "OFF";
   timestamp_value = LOG_UPLOAD_FALLBACK_TIMESTAMP;
+  AppSelfTest_FormatSensorStatus(sensor_status, sizeof(sensor_status));
 
   if ((DS3231_ReadTime(&rtc_time) != 0U) &&
       (DS3231_FormatTimestamp(&rtc_time, timestamp, sizeof(timestamp)) != 0U))
@@ -96,7 +99,8 @@ void LogUpload_PrintJson(const AIResult_t *ai,
                      "\"liquid_level\":\"%s\","
                      "\"pump_action\":\"%s\",\"fan_action\":\"%s\","
                      "\"pump_duration_s\":%lu,\"fan_duration_s\":%lu,"
-                     "\"current_ma\":%lu,\"alarm\":\"%s\"}",
+                     "\"current_ma\":%lu,\"system_status\":\"%s\","
+                     "\"sensor_status\":\"%s\",\"alarm\":\"%s\"}",
                      LOG_UPLOAD_SCHEMA_VERSION,
                      LOG_UPLOAD_DEVICE_ID,
                      timestamp_value,
@@ -119,6 +123,8 @@ void LogUpload_PrintJson(const AIResult_t *ai,
                      (unsigned long)pump_duration_s,
                      (unsigned long)fan_duration_s,
                      (unsigned long)sensor->current_ma,
+                     AppSelfTest_GetSystemStatus(),
+                     sensor_status,
                      LOG_UPLOAD_ALARM);
 
   if ((written < 0) || ((uint32_t)written >= sizeof(json)))

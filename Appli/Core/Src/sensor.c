@@ -1,5 +1,6 @@
 #include "sensor.h"
 
+#include "app_selftest.h"
 #include "bh1750.h"
 #include "bmp280.h"
 #include "ina219.h"
@@ -11,10 +12,10 @@ extern I2C_HandleTypeDef hi2c2;
 void Sensor_Init(void)
 {
   printf("[SENSOR] init ok\r\n");
-  Sensor_I2CScan();
-  (void)BH1750_Init();
-  (void)BMP280_Init();
-  (void)INA219_Init();
+  AppSelfTest_Set(APP_SELFTEST_I2C, Sensor_I2CScan());
+  AppSelfTest_Set(APP_SELFTEST_BH1750, BH1750_Init());
+  AppSelfTest_Set(APP_SELFTEST_BME280, BMP280_Init());
+  AppSelfTest_Set(APP_SELFTEST_INA219, INA219_Init());
 }
 
 void Sensor_Update(SensorData_t *data)
@@ -88,7 +89,7 @@ void Sensor_Print(const SensorData_t *data)
          data->rain_detected);
 }
 
-void Sensor_I2CScan(void)
+uint8_t Sensor_I2CScan(void)
 {
   uint8_t address;
   uint8_t found_count = 0U;
@@ -110,4 +111,5 @@ void Sensor_I2CScan(void)
   }
 
   printf("[I2C_SCAN] done\r\n");
+  return (found_count != 0U) ? 1U : 0U;
 }

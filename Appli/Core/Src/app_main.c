@@ -1,6 +1,7 @@
 #include "app_main.h"
 
 #include "ai_result.h"
+#include "app_selftest.h"
 #include "app_uart.h"
 #include "buzzer.h"
 #include "ds3231.h"
@@ -184,19 +185,27 @@ static void App_Business_Process(uint32_t now_ms)
 
 void App_Init(void)
 {
+  uint8_t ds3231_ok;
+
+  AppSelfTest_Init();
   led_init();
   App_UART_Init(115200);
+  AppSelfTest_Set(APP_SELFTEST_UART, 1U);
   printf("[BOOT] PlantDisease Edge Control Start\r\n");
   Buzzer_Init();
+  AppSelfTest_Set(APP_SELFTEST_BUZZER, 1U);
   printf("[BUZZER] init ok\r\n");
   Relay_Init();
+  AppSelfTest_Set(APP_SELFTEST_RELAY, 1U);
   Pump_Init();
   Fan_Init();
   AIResult_Init();
   Prescription_Init();
   LogUpload_Init();
   Sensor_Init();
-  (void)DS3231_Init();
+  ds3231_ok = DS3231_Init();
+  AppSelfTest_Set(APP_SELFTEST_DS3231, ds3231_ok);
+  AppSelfTest_Print();
 }
 
 void App_Loop(void)

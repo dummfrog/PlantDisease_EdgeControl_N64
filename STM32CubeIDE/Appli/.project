@@ -146,6 +146,16 @@
 			<locationURI>PARENT-2-PROJECT_LOC/Appli/Core/Src/app_main.c</locationURI>
 		</link>
 		<link>
+			<name>Application/User/Core/app_selftest.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/Appli/Core/Src/app_selftest.c</locationURI>
+		</link>
+		<link>
+			<name>Application/User/Core/app_selftest.h</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/Appli/Core/Inc/app_selftest.h</locationURI>
+		</link>
+		<link>
 			<name>Application/User/Core/ai_result.c</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/Appli/Core/Src/ai_result.c</locationURI>
