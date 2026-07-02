@@ -1,0 +1,778 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>STM32N647 智慧农业病虫害识别 Dashboard</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%2307110f'/%3E%3Cpath d='M16 39c18 2 29-8 32-25-17 2-30 9-32 25Z' fill='%2322c55e'/%3E%3Cpath d='M20 41c8-10 17-17 28-25' stroke='%23facc15' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    :root {
+      --bg: #07110f;
+      --panel: rgba(13, 23, 30, .82);
+      --panel-2: rgba(16, 28, 38, .92);
+      --line: rgba(168, 199, 186, .18);
+      --text: #eefaf4;
+      --muted: #9db1a8;
+      --green: #22c55e;
+      --cyan: #5eead4;
+      --blue: #60a5fa;
+      --amber: #facc15;
+      --orange: #fb923c;
+      --red: #f87171;
+      --radius: 8px;
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      font-family: Inter, "Segoe UI", "Microsoft YaHei", Arial, sans-serif;
+      background:
+        linear-gradient(135deg, rgba(5, 18, 16, .98), rgba(11, 24, 34, .98)),
+        repeating-linear-gradient(90deg, rgba(94, 234, 212, .06) 0 1px, transparent 1px 56px);
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background:
+        radial-gradient(circle at 10% 8%, rgba(34, 197, 94, .18), transparent 28%),
+        radial-gradient(circle at 88% 4%, rgba(96, 165, 250, .14), transparent 25%),
+        linear-gradient(transparent, rgba(3, 9, 10, .35));
+    }
+    .shell { max-width: 1520px; margin: 0 auto; padding: 22px; }
+    .topbar, .metric, .panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: 0 18px 50px rgba(0, 0, 0, .28), inset 0 1px 0 rgba(255,255,255,.04);
+      backdrop-filter: blur(16px);
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      padding: 18px 20px;
+      margin-bottom: 14px;
+    }
+    .eyebrow { color: var(--cyan); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 6px; }
+    h1 { margin: 0; font-size: 25px; line-height: 1.25; letter-spacing: 0; }
+    h2 { margin: 0 0 13px; font-size: 17px; letter-spacing: 0; }
+    .actions { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 10px; }
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 39px;
+      padding: 0 12px;
+      border: 1px solid rgba(148, 163, 184, .24);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.05);
+      color: #d8f4ea;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+    .dot { width: 8px; height: 8px; border-radius: 99px; background: var(--green); box-shadow: 0 0 16px rgba(34,197,94,.8); }
+    .btn {
+      border: 0;
+      min-height: 39px;
+      border-radius: var(--radius);
+      padding: 0 14px;
+      color: #04130f;
+      background: linear-gradient(135deg, #22c55e, #facc15);
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .btn.secondary {
+      color: #d8f4ea;
+      border: 1px solid rgba(148, 163, 184, .28);
+      background: rgba(255,255,255,.07);
+    }
+    .btn:disabled { opacity: .55; cursor: not-allowed; }
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+    .metric { padding: 17px; }
+    .metric-label { color: var(--muted); font-size: 13px; }
+    .metric-value { margin-top: 10px; font-size: 31px; font-weight: 900; letter-spacing: 0; }
+    .metric-foot { margin-top: 8px; color: #7f948b; font-size: 12px; }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+    .panel { padding: 18px; margin-bottom: 14px; }
+    .upload-layout {
+      display: grid;
+      grid-template-columns: minmax(280px, 430px) minmax(0, 1fr);
+      gap: 14px;
+      align-items: start;
+    }
+    .formbox, .resultbox {
+      border: 1px solid rgba(148, 163, 184, .14);
+      border-radius: var(--radius);
+      background: var(--panel-2);
+      padding: 15px;
+    }
+    .formbox { display: grid; gap: 12px; }
+    label { display: block; margin-bottom: 6px; color: var(--muted); font-size: 12px; }
+    input[type="file"], input[type="search"], select {
+      width: 100%;
+      min-height: 39px;
+      padding: 8px 10px;
+      color: var(--text);
+      border: 1px solid rgba(148, 163, 184, .24);
+      border-radius: var(--radius);
+      background: rgba(6, 16, 20, .74);
+    }
+    .message { min-height: 18px; color: var(--muted); font-size: 13px; line-height: 1.45; }
+    .result-grid, .device-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .result-item, .device-card {
+      min-height: 68px;
+      border: 1px solid rgba(148, 163, 184, .13);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.045);
+      padding: 10px;
+    }
+    .item-label { color: var(--muted); font-size: 12px; margin-bottom: 6px; }
+    .item-value { font-size: 14px; font-weight: 800; overflow-wrap: anywhere; }
+    .chart-wrap { height: 290px; position: relative; }
+    .toolbar {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 13px;
+    }
+    .filters { display: grid; grid-template-columns: repeat(5, minmax(130px, 1fr)); gap: 10px; min-width: min(100%, 840px); }
+    .table-scroll {
+      overflow-x: auto;
+      border: 1px solid rgba(148, 163, 184, .14);
+      border-radius: var(--radius);
+      background: var(--panel-2);
+    }
+    table { width: 100%; min-width: 1180px; border-collapse: collapse; }
+    th, td { padding: 9px 10px; border-bottom: 1px solid rgba(255,255,255,.08); text-align: left; font-size: 13px; }
+    th { color: #b8cbc2; white-space: nowrap; cursor: pointer; user-select: none; }
+    td { color: #e8f7f1; vertical-align: top; }
+    .text-cell { max-width: 230px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 76px;
+      padding: 5px 8px;
+      border: 1px solid;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    .LOW { color: #bbf7d0; background: rgba(34,197,94,.16); border-color: rgba(74,222,128,.40); }
+    .MEDIUM { color: #fef08a; background: rgba(250,204,21,.16); border-color: rgba(250,204,21,.40); }
+    .MEDIUM_HIGH { color: #fed7aa; background: rgba(251,146,60,.16); border-color: rgba(251,146,60,.42); }
+    .HIGH { color: #fecaca; background: rgba(248,113,113,.18); border-color: rgba(248,113,113,.42); }
+    .UNKNOWN { color: #e2e8f0; background: rgba(148,163,184,.14); border-color: rgba(203,213,225,.30); }
+    .ONLINE { color: #bbf7d0; }
+    .RECENT { color: #fef08a; }
+    .OFFLINE { color: #cbd5e1; }
+    .alert-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+    .alert-card { border: 1px solid rgba(248, 113, 113, .28); border-radius: var(--radius); background: rgba(127, 29, 29, .22); padding: 11px; }
+    .alert-title { font-size: 13px; font-weight: 900; color: #fecaca; margin-bottom: 5px; }
+    .heatmap-table { width: 100%; min-width: 720px; border-collapse: separate; border-spacing: 5px; }
+    .heatmap-cell { height: 28px; min-width: 42px; border-radius: 5px; text-align: center; font-size: 11px; color: #06110e; }
+    .heat-0 { background: rgba(148, 163, 184, .18); color: #cbd5e1; }
+    .heat-1 { background: rgba(34, 197, 94, .45); }
+    .heat-2 { background: rgba(250, 204, 21, .58); }
+    .heat-3 { background: rgba(251, 146, 60, .70); }
+    .heat-4, .heat-5 { background: rgba(248, 113, 113, .82); }
+    .modal { position: fixed; inset: 0; z-index: 20; display: none; align-items: center; justify-content: center; padding: 20px; background: rgba(0, 0, 0, .62); }
+    .modal.open { display: flex; }
+    .modal-panel { width: min(980px, 100%); max-height: 86vh; overflow: auto; border: 1px solid var(--line); border-radius: var(--radius); background: #0b1820; padding: 18px; box-shadow: 0 30px 90px rgba(0,0,0,.45); }
+    .detail-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+    details pre { white-space: pre-wrap; overflow-wrap: anywhere; border: 1px solid rgba(148,163,184,.18); border-radius: var(--radius); padding: 12px; background: rgba(0,0,0,.24); color: #d8f4ea; }
+    body.bigscreen .shell { max-width: 1720px; }
+    body.bigscreen .metric-value { font-size: 42px; }
+    body.bigscreen .upload-layout { display: none; }
+    @media (max-width: 1100px) {
+      .metrics, .grid-2, .upload-layout, .result-grid, .device-grid, .alert-grid, .detail-grid { grid-template-columns: 1fr; }
+      .toolbar { align-items: stretch; flex-direction: column; }
+      .filters { grid-template-columns: 1fr; min-width: 0; }
+    }
+    @media (max-width: 760px) {
+      .shell { padding: 14px; }
+      .topbar { align-items: flex-start; flex-direction: column; }
+      .actions { justify-content: flex-start; }
+      h1 { font-size: 21px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow">AI Disease Closed Loop Console</div>
+        <h1>STM32N647 智慧农业病虫害识别云平台</h1>
+      </div>
+      <div class="actions">
+        <button class="btn secondary" id="refreshBtn">刷新</button>
+        <button class="btn secondary" id="bigscreenBtn">大屏模式</button>
+        <button class="btn secondary" id="exportBtn">导出 CSV</button>
+        <button class="btn" id="simulateBtn">模拟 STM32 上传</button>
+        <div class="status"><span class="dot"></span><span id="serviceStatus">连接中</span></div>
+      </div>
+    </header>
+
+    <section class="metrics">
+      <article class="metric">
+        <div class="metric-label">总检测次数</div>
+        <div class="metric-value" id="totalDetections">--</div>
+        <div class="metric-foot">来自 diagnosis_records</div>
+      </article>
+      <article class="metric">
+        <div class="metric-label">今日告警次数</div>
+        <div class="metric-value" id="todayAlerts">--</div>
+        <div class="metric-foot">近 24 小时 MEDIUM 以上</div>
+      </article>
+      <article class="metric">
+        <div class="metric-label">在线设备数</div>
+        <div class="metric-value" id="onlineDevices">--</div>
+        <div class="metric-foot">30 分钟内有上传记录</div>
+      </article>
+      <article class="metric">
+        <div class="metric-label">正常植物比例</div>
+        <div class="metric-value" id="healthyRatio">--</div>
+        <div class="metric-foot">Healthy 类别占比</div>
+      </article>
+    </section>
+
+    <section class="panel">
+      <div class="toolbar">
+        <div>
+          <h2>图片上传与 AI 识别</h2>
+          <div class="message" id="uploadMessage">上传叶片图片后，将执行 YOLO 推理、专家知识库查询、写入 Supabase 并刷新 Dashboard。</div>
+        </div>
+      </div>
+      <div class="upload-layout">
+        <div class="formbox">
+          <div>
+            <label for="imageInput">叶片图片</label>
+            <input type="file" id="imageInput" accept="image/*" />
+          </div>
+          <div>
+            <label for="deviceSelect">上传设备</label>
+            <select id="deviceSelect">
+              <option value="STM32N647-UPLOAD">网页上传演示</option>
+              <option value="STM32N647_001">STM32N647_001</option>
+              <option value="Node01">Node01 番茄区</option>
+              <option value="Node03">Node03 马铃薯区</option>
+            </select>
+          </div>
+          <button class="btn" id="uploadBtn">上传并识别</button>
+          <div class="message" id="modelHint">模型状态读取中</div>
+        </div>
+        <div class="resultbox" id="resultBox">
+          <div class="message">等待上传图片。</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid-2">
+      <div class="panel">
+        <h2>病害分布</h2>
+        <div class="chart-wrap"><canvas id="diseaseChart"></canvas></div>
+      </div>
+      <div class="panel">
+        <h2>风险等级统计</h2>
+        <div class="chart-wrap"><canvas id="riskChart"></canvas></div>
+      </div>
+    </section>
+
+    <section class="grid-2">
+      <div class="panel">
+        <h2>每日检测趋势</h2>
+        <div class="chart-wrap"><canvas id="trendChart"></canvas></div>
+      </div>
+      <div class="panel">
+        <h2>设备状态</h2>
+        <div class="device-grid" id="deviceGrid"><div class="message">加载中</div></div>
+      </div>
+    </section>
+
+    <section class="grid-2">
+      <div class="panel">
+        <h2>告警中心</h2>
+        <div class="alert-grid" id="alertGrid"><div class="message">加载中</div></div>
+      </div>
+      <div class="panel">
+        <h2>区域-时间热力图</h2>
+        <div class="message">最近 24 小时，颜色越深表示风险越高。</div>
+        <div class="table-scroll"><div id="heatmapGrid" class="message">加载中</div></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="toolbar">
+        <div>
+          <h2>历史记录</h2>
+          <div class="message" id="tableMessage">支持搜索、风险筛选和点击表头排序。</div>
+        </div>
+        <div class="filters">
+          <select id="timeFilter">
+            <option value="">全部时间</option>
+            <option value="1">最近 1 小时</option>
+            <option value="24">最近 24 小时</option>
+            <option value="168">最近 7 天</option>
+          </select>
+          <select id="deviceFilter">
+            <option value="">全部节点</option>
+            <option value="Node01">Node01</option>
+            <option value="Node02">Node02</option>
+            <option value="Node03">Node03</option>
+          </select>
+          <input type="search" id="searchInput" placeholder="搜索病害、设备、处方" />
+          <select id="riskFilter">
+            <option value="">全部风险</option>
+            <option value="HIGH">HIGH</option>
+            <option value="MEDIUM_HIGH">MEDIUM_HIGH</option>
+            <option value="MEDIUM">MEDIUM</option>
+            <option value="LOW">LOW</option>
+          </select>
+          <select id="sourceFilter">
+            <option value="">全部来源</option>
+            <option value="yolo">YOLO</option>
+            <option value="stm32">STM32 模拟</option>
+            <option value="simulated">Mock fallback</option>
+            <option value="edge_function_l160_http">L160/L610 Edge</option>
+          </select>
+        </div>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th data-sort="timestamp">时间</th>
+              <th data-sort="device_id">设备</th>
+              <th data-sort="disease">病害</th>
+              <th data-sort="disease_cn">中文名</th>
+              <th data-sort="confidence">置信度</th>
+              <th data-sort="risk_level">风险</th>
+              <th>处方药剂</th>
+              <th>喷药间隔</th>
+              <th>灌溉建议</th>
+              <th>动作</th>
+              <th>泵</th>
+              <th>风扇</th>
+              <th>来源</th>
+              <th>模型</th>
+              <th>详情</th>
+            </tr>
+          </thead>
+          <tbody id="historyBody">
+            <tr><td colspan="15">加载中</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <div class="modal" id="detailModal" aria-hidden="true">
+    <div class="modal-panel">
+      <div class="toolbar">
+        <h2>诊断详情</h2>
+        <button class="btn secondary" id="closeDetailBtn">关闭</button>
+      </div>
+      <div id="detailContent"></div>
+    </div>
+  </div>
+
+  <script>
+    const state = {
+      records: [],
+      sortKey: "timestamp",
+      sortDir: "desc",
+      charts: {}
+    };
+
+    const els = {
+      serviceStatus: document.getElementById("serviceStatus"),
+      refreshBtn: document.getElementById("refreshBtn"),
+      bigscreenBtn: document.getElementById("bigscreenBtn"),
+      exportBtn: document.getElementById("exportBtn"),
+      simulateBtn: document.getElementById("simulateBtn"),
+      totalDetections: document.getElementById("totalDetections"),
+      todayAlerts: document.getElementById("todayAlerts"),
+      onlineDevices: document.getElementById("onlineDevices"),
+      healthyRatio: document.getElementById("healthyRatio"),
+      imageInput: document.getElementById("imageInput"),
+      deviceSelect: document.getElementById("deviceSelect"),
+      uploadBtn: document.getElementById("uploadBtn"),
+      uploadMessage: document.getElementById("uploadMessage"),
+      modelHint: document.getElementById("modelHint"),
+      resultBox: document.getElementById("resultBox"),
+      deviceGrid: document.getElementById("deviceGrid"),
+      alertGrid: document.getElementById("alertGrid"),
+      heatmapGrid: document.getElementById("heatmapGrid"),
+      historyBody: document.getElementById("historyBody"),
+      timeFilter: document.getElementById("timeFilter"),
+      deviceFilter: document.getElementById("deviceFilter"),
+      searchInput: document.getElementById("searchInput"),
+      riskFilter: document.getElementById("riskFilter"),
+      sourceFilter: document.getElementById("sourceFilter"),
+      detailModal: document.getElementById("detailModal"),
+      detailContent: document.getElementById("detailContent"),
+      closeDetailBtn: document.getElementById("closeDetailBtn")
+    };
+
+    function escapeHtml(value) {
+      return String(value ?? "--").replace(/[&<>"']/g, ch => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      }[ch]));
+    }
+
+    function riskBadge(risk) {
+      const level = risk || "UNKNOWN";
+      return '<span class="badge ' + escapeHtml(level) + '">' + escapeHtml(level) + '</span>';
+    }
+
+    function formatTime(value) {
+      if (!value) return "--";
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return value;
+      return date.toLocaleString("zh-CN", { hour12: false });
+    }
+
+    function formatConfidence(value) {
+      const number = Number(value || 0);
+      return (number * 100).toFixed(1) + "%";
+    }
+
+    function formatPercent(value) {
+      return Number(value || 0).toFixed(1) + "%";
+    }
+
+    function truncate(value, max) {
+      const text = String(value ?? "--");
+      return text.length > max ? text.slice(0, max) + "..." : text;
+    }
+
+    async function requestJson(url, options) {
+      const response = await fetch(url, options);
+      if (!response.ok) throw new Error(url + " " + response.status);
+      return response.json();
+    }
+
+    function renderMetrics(stats) {
+      const summary = stats.summary || {};
+      els.totalDetections.textContent = summary.total_detections ?? 0;
+      els.todayAlerts.textContent = summary.recent_24h_alerts ?? 0;
+      els.onlineDevices.textContent = summary.online_devices ?? 0;
+      els.healthyRatio.textContent = formatPercent(summary.healthy_ratio);
+    }
+
+    function chart(id, config) {
+      if (!window.Chart) return;
+      if (state.charts[id]) state.charts[id].destroy();
+      state.charts[id] = new Chart(document.getElementById(id), config);
+    }
+
+    function renderCharts(stats) {
+      const colors = ["#22c55e", "#60a5fa", "#facc15", "#fb923c", "#f87171", "#5eead4", "#a3e635", "#c084fc"];
+      const diseaseData = stats.disease_distribution || [];
+      const riskData = stats.risk_distribution || [];
+      const trendData = stats.daily_trend || [];
+
+      chart("diseaseChart", {
+        type: "doughnut",
+        data: {
+          labels: diseaseData.map(item => item.name),
+          datasets: [{ data: diseaseData.map(item => item.value), backgroundColor: colors, borderColor: "rgba(7,17,15,.95)", borderWidth: 2 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, cutout: "58%", plugins: { legend: { position: "bottom", labels: { color: "#e8f7f1" } } } }
+      });
+
+      chart("riskChart", {
+        type: "bar",
+        data: {
+          labels: riskData.map(item => item.name),
+          datasets: [{ data: riskData.map(item => item.value), backgroundColor: riskData.map(item => ({ LOW: "#22c55e", MEDIUM: "#facc15", MEDIUM_HIGH: "#fb923c", HIGH: "#f87171" }[item.name] || "#94a3b8")), borderRadius: 6 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: chartScales() }
+      });
+
+      chart("trendChart", {
+        type: "line",
+        data: {
+          labels: trendData.map(item => item.date),
+          datasets: [{ data: trendData.map(item => item.count), borderColor: "#5eead4", backgroundColor: "rgba(94,234,212,.16)", tension: .35, fill: true, pointRadius: 3 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: chartScales() }
+      });
+    }
+
+    function chartScales() {
+      return {
+        x: { ticks: { color: "#d8f4ea" }, grid: { color: "rgba(148,163,184,.08)" } },
+        y: { beginAtZero: true, ticks: { color: "#d8f4ea", precision: 0 }, grid: { color: "rgba(148,163,184,.12)" } }
+      };
+    }
+
+    function renderDevices(devices) {
+      els.deviceGrid.innerHTML = (devices || []).map(device => [
+        '<article class="device-card">',
+        '<div class="item-label">', escapeHtml(device.area_name), '</div>',
+        '<div class="item-value">', escapeHtml(device.device_id), '</div>',
+        '<div class="message ', escapeHtml(device.status), '">', escapeHtml(device.status), '</div>',
+        '<div class="message">最后上传：', escapeHtml(formatTime(device.last_upload_time)), '</div>',
+        '<div class="message">作物：', escapeHtml(device.crop_type || "--"), '</div>',
+        '<div class="message">最近病害：', escapeHtml(device.latest_disease_cn || device.latest_disease), '</div>',
+        '<div class="message">最近动作：', escapeHtml(device.latest_action || "--"), '</div>',
+        '<div>', riskBadge(device.latest_risk_level), '</div>',
+        '</article>'
+      ].join("")).join("") || '<div class="message">暂无设备数据</div>';
+    }
+
+    function renderAlerts(alerts) {
+      els.alertGrid.innerHTML = (alerts || []).slice(0, 9).map(alert => [
+        '<article class="alert-card">',
+        '<div class="alert-title">', escapeHtml(alert.alert_type), ' / ', escapeHtml(alert.device_id), '</div>',
+        '<div class="message">', escapeHtml(formatTime(alert.time)), '</div>',
+        '<div>', riskBadge(alert.risk_level), '</div>',
+        '<div class="message">', escapeHtml(alert.disease_cn || "--"), '</div>',
+        '<div class="message">', escapeHtml(alert.suggested_action), '</div>',
+        '</article>'
+      ].join("")).join("") || '<div class="message">当前无集中告警</div>';
+    }
+
+    function renderHeatmap(matrix) {
+      const hours = matrix.hours || [];
+      const nodes = matrix.nodes || [];
+      const header = '<tr><th>节点</th>' + hours.map(h => '<th>' + escapeHtml(h) + '</th>').join("") + '</tr>';
+      const rows = nodes.map(node => '<tr><th>' + escapeHtml(node.device_id) + '</th>' + (node.values || []).map(cell => {
+        const score = Math.max(0, Math.min(5, Number(cell.risk_score || 0)));
+        const title = '记录数: ' + (cell.record_count || 0) + ' / 风险分: ' + score;
+        return '<td class="heatmap-cell heat-' + score + '" title="' + escapeHtml(title) + '">' + (cell.record_count || "") + '</td>';
+      }).join("") + '</tr>').join("");
+      els.heatmapGrid.innerHTML = '<table class="heatmap-table">' + header + rows + '</table>';
+    }
+
+    function filteredRecords() {
+      const query = els.searchInput.value.trim().toLowerCase();
+      const hours = Number(els.timeFilter.value || 0);
+      const cutoff = hours ? Date.now() - hours * 3600 * 1000 : 0;
+      const device = els.deviceFilter.value;
+      const risk = els.riskFilter.value;
+      const source = els.sourceFilter.value;
+      return state.records.filter(record => {
+        const text = [record.device_id, record.disease, record.disease_cn, record.pesticide, record.suggestion, record.model_name].join(" ").toLowerCase();
+        const time = new Date(record.timestamp || record.created_at || 0).getTime();
+        if (cutoff && (!time || time < cutoff)) return false;
+        if (device && record.device_id !== device) return false;
+        if (query && !text.includes(query)) return false;
+        if (risk && record.risk_level !== risk) return false;
+        if (source && !String(record.inference_source || "").toLowerCase().includes(source)) return false;
+        return true;
+      }).sort((a, b) => {
+        const av = a[state.sortKey] ?? "";
+        const bv = b[state.sortKey] ?? "";
+        const result = Number(av) && Number(bv) ? Number(av) - Number(bv) : String(av).localeCompare(String(bv));
+        return state.sortDir === "asc" ? result : -result;
+      });
+    }
+
+    function renderTable() {
+      const rows = filteredRecords().slice(0, 80).map(record => [
+        "<tr>",
+        "<td>", escapeHtml(formatTime(record.timestamp || record.created_at)), "</td>",
+        "<td>", escapeHtml(record.device_id), "</td>",
+        "<td>", escapeHtml(record.disease), "</td>",
+        "<td><strong>", escapeHtml(record.disease_cn || record.chinese_name), "</strong></td>",
+        "<td>", escapeHtml(formatConfidence(record.confidence)), "</td>",
+        "<td>", riskBadge(record.risk_level), "</td>",
+        '<td class="text-cell" title="', escapeHtml(record.pesticide), '">', escapeHtml(truncate(record.pesticide, 28)), "</td>",
+        "<td>", escapeHtml(record.spray_interval), "</td>",
+        '<td class="text-cell" title="', escapeHtml(record.irrigation_recommendation), '">', escapeHtml(truncate(record.irrigation_recommendation, 28)), "</td>",
+        "<td>", escapeHtml(record.action), "</td>",
+        "<td>", escapeHtml(record.pump_action), " / ", escapeHtml(record.pump_duration_s), "s</td>",
+        "<td>", escapeHtml(record.fan_action), " / ", escapeHtml(record.fan_duration_s), "s</td>",
+        "<td>", escapeHtml(record.inference_source), "</td>",
+        "<td>", escapeHtml(record.model_name), "</td>",
+        '<td><button class="btn secondary detail-btn" data-id="', escapeHtml(record.id), '">详情</button></td>',
+        "</tr>"
+      ].join(""));
+
+      els.historyBody.innerHTML = rows.length ? rows.join("") : '<tr><td colspan="15">暂无匹配记录</td></tr>';
+      document.querySelectorAll(".detail-btn").forEach(btn => btn.addEventListener("click", () => showDetail(btn.dataset.id)));
+    }
+
+    function renderDetail(record) {
+      const safeRecord = { ...record };
+      delete safeRecord.device_token;
+      delete safeRecord.signature;
+      delete safeRecord.secret;
+      const groups = [
+        ["基本信息", [["record id", record.id], ["device_id", record.device_id], ["created_at", formatTime(record.created_at || record.timestamp)], ["inference_source", record.inference_source], ["model_name", record.model_name]]],
+        ["识别信息", [["disease_id", record.disease_id], ["disease", record.disease], ["disease_cn", record.disease_cn], ["confidence", formatConfidence(record.confidence)], ["risk_level", record.risk_level]]],
+        ["环境信息", [["temperature_c", record.temperature_c], ["humidity_percent", record.humidity_percent], ["light_lux", record.light_lux], ["soil_moisture_percent", record.soil_moisture_percent]]],
+        ["执行动作", [["pump_action", record.pump_action], ["fan_action", record.fan_action], ["pump_duration_s", record.pump_duration_s], ["fan_duration_s", record.fan_duration_s]]],
+        ["安全状态", [["liquid_level", record.liquid_level], ["current_ma", record.current_ma], ["system_status", record.system_status], ["sensor_status", record.sensor_status], ["alarm", record.alarm]]],
+        ["专家处方", [["pesticide", record.pesticide], ["suggestion", record.suggestion]]]
+      ];
+      els.detailContent.innerHTML = groups.map(group => '<h2>' + escapeHtml(group[0]) + '</h2><div class="detail-grid">' + group[1].map(pair =>
+        '<div class="result-item"><div class="item-label">' + escapeHtml(pair[0]) + '</div><div class="item-value">' + escapeHtml(pair[1]) + '</div></div>'
+      ).join("") + '</div>').join("") + '<details open><summary>原始记录 JSON</summary><pre>' + escapeHtml(JSON.stringify(safeRecord, null, 2)) + '</pre></details>';
+    }
+
+    async function showDetail(id) {
+      const local = state.records.find(record => String(record.id) === String(id));
+      renderDetail(local || {});
+      els.detailModal.classList.add("open");
+      els.detailModal.setAttribute("aria-hidden", "false");
+      try {
+        const data = await requestJson("/api/record/" + encodeURIComponent(id));
+        if (data.record) renderDetail(data.record);
+      } catch (error) {
+        console.warn(error);
+      }
+    }
+
+    function renderResult(record) {
+      const fields = [
+        ["病害", record.disease],
+        ["中文名", record.disease_cn || record.chinese_name],
+        ["置信度", formatConfidence(record.confidence)],
+        ["风险等级", record.risk_level],
+        ["推荐药剂", record.pesticide || record.recommended_pesticide],
+        ["喷药间隔", record.spray_interval],
+        ["通风建议", record.ventilation_required ? "需要通风" : "无需强制通风"],
+        ["灌溉建议", record.irrigation_recommendation],
+        ["执行动作", record.action],
+        ["水泵", (record.pump_action || "--") + " / " + (record.pump_duration_s ?? 0) + "s"],
+        ["风扇", (record.fan_action || "--") + " / " + (record.fan_duration_s ?? 0) + "s"],
+        ["推理来源", record.inference_source]
+      ];
+      els.resultBox.innerHTML = '<div class="result-grid">' + fields.map(pair =>
+        '<div class="result-item"><div class="item-label">' + escapeHtml(pair[0]) + '</div><div class="item-value">' + escapeHtml(pair[1]) + '</div></div>'
+      ).join("") + '</div>';
+    }
+
+    async function refreshDashboard() {
+      els.refreshBtn.disabled = true;
+      try {
+        const [health, stats, history, devices, alerts, heatmap] = await Promise.all([
+          requestJson("/api/health"),
+          requestJson("/api/stats"),
+          requestJson("/api/history?limit=300"),
+          requestJson("/api/devices"),
+          requestJson("/api/alerts"),
+          requestJson("/api/heatmap_matrix")
+        ]);
+        state.records = history.records || [];
+        renderMetrics(stats);
+        renderCharts(stats);
+        renderDevices(devices.devices || []);
+        renderAlerts(alerts.alerts || []);
+        renderHeatmap(heatmap);
+        renderTable();
+        els.serviceStatus.textContent = health.supabase_connected ? "API 正常 / Supabase 已配置" : "API 正常 / Mock fallback";
+        els.modelHint.textContent = health.model && health.model.exists ? "YOLO 模型已就绪：" + health.model.active_path : "未找到 YOLO 模型，将使用 mock fallback";
+      } catch (error) {
+        console.error(error);
+        els.serviceStatus.textContent = "API 异常";
+        els.historyBody.innerHTML = '<tr><td colspan="15">接口加载失败，请确认 Flask 后端已启动。</td></tr>';
+      } finally {
+        els.refreshBtn.disabled = false;
+      }
+    }
+
+    async function uploadImage() {
+      const file = els.imageInput.files && els.imageInput.files[0];
+      if (!file) {
+        els.uploadMessage.textContent = "请先选择一张叶片图片。";
+        return;
+      }
+      els.uploadBtn.disabled = true;
+      els.uploadMessage.textContent = "正在上传并执行 YOLO 推理...";
+      try {
+        const form = new FormData();
+        form.append("file", file);
+        form.append("device_id", els.deviceSelect.value);
+        const data = await requestJson("/api/upload", { method: "POST", body: form });
+        const record = data.record || data.result;
+        renderResult(record);
+        els.uploadMessage.textContent = "闭环完成：图片上传、YOLO 识别、专家处方、Supabase 写入和 Dashboard 刷新已执行。";
+        await refreshDashboard();
+      } catch (error) {
+        console.error(error);
+        els.uploadMessage.textContent = "上传识别失败，请查看后端终端日志。";
+      } finally {
+        els.uploadBtn.disabled = false;
+      }
+    }
+
+    async function simulateDevice() {
+      els.simulateBtn.disabled = true;
+      try {
+        const data = await requestJson("/api/simulate_device", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ device_id: "STM32N647_001" })
+        });
+        renderResult(data.record);
+        await refreshDashboard();
+      } catch (error) {
+        console.error(error);
+      } finally {
+        els.simulateBtn.disabled = false;
+      }
+    }
+
+    document.querySelectorAll("th[data-sort]").forEach(th => {
+      th.addEventListener("click", () => {
+        const key = th.dataset.sort;
+        if (state.sortKey === key) state.sortDir = state.sortDir === "asc" ? "desc" : "asc";
+        else { state.sortKey = key; state.sortDir = "asc"; }
+        renderTable();
+      });
+    });
+    els.refreshBtn.addEventListener("click", refreshDashboard);
+    els.bigscreenBtn.addEventListener("click", () => {
+      document.body.classList.toggle("bigscreen");
+      els.bigscreenBtn.textContent = document.body.classList.contains("bigscreen") ? "退出大屏" : "大屏模式";
+    });
+    els.exportBtn.addEventListener("click", () => {
+      const params = new URLSearchParams();
+      if (els.timeFilter.value) params.set("hours", els.timeFilter.value);
+      if (els.deviceFilter.value) params.set("device_id", els.deviceFilter.value);
+      if (els.riskFilter.value) params.set("risk_level", els.riskFilter.value);
+      if (els.sourceFilter.value) params.set("source", els.sourceFilter.value);
+      window.location.href = "/api/export_csv?" + params.toString();
+    });
+    els.uploadBtn.addEventListener("click", uploadImage);
+    els.simulateBtn.addEventListener("click", simulateDevice);
+    els.closeDetailBtn.addEventListener("click", () => {
+      els.detailModal.classList.remove("open");
+      els.detailModal.setAttribute("aria-hidden", "true");
+    });
+    els.timeFilter.addEventListener("change", renderTable);
+    els.deviceFilter.addEventListener("change", renderTable);
+    els.searchInput.addEventListener("input", renderTable);
+    els.riskFilter.addEventListener("change", renderTable);
+    els.sourceFilter.addEventListener("change", renderTable);
+
+    refreshDashboard();
+    window.setInterval(refreshDashboard, 8000);
+  </script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+﻿image,status,top1_id,top1_label,top1_label_cn,top1_confidence,top3,raw_output_shape
+Pepper_bell_Bacterial_spot__0022d6b7-d47c-4ee2-ae9a-392a53f48647___JR_B.Spot 8964.JPG,ok,0,Pepper_Bell_Bacterial_Spot,辣椒细菌性斑点病,0.999997,0:Pepper_Bell_Bacterial_Spot:0.999997 | 5:Tomato_Early_Blight:0.000002 | 1:Pepper_Bell_Healthy:0.000001,"(1, 8)"
+Pepper_bell_healthy__016ed5ad-be29-4e9d-8ae5-069a016b1327___JR_HL 8536.JPG,ok,1,Pepper_Bell_Healthy,健康辣椒叶,0.999999,1:Pepper_Bell_Healthy:0.999999 | 0:Pepper_Bell_Bacterial_Spot:0.000001 | 7:Tomato_Healthy:0.000000,"(1, 8)"
+Potato_Early_blight__0182e991-97f0-4805-a1f7-6e1b4306d518___RS_Early.B 7015.JPG,ok,2,Potato_Early_Blight,马铃薯早疫病,1.000000,2:Potato_Early_Blight:1.000000 | 3:Potato_Late_Blight:0.000000 | 6:Tomato_Late_Blight:0.000000,"(1, 8)"
+Potato_healthy__170f1f57-0fd4-421f-9c82-3b1804be63ad___RS_HL 1771.JPG,ok,4,Potato_Healthy,健康马铃薯叶,0.999656,4:Potato_Healthy:0.999656 | 3:Potato_Late_Blight:0.000343 | 1:Pepper_Bell_Healthy:0.000001,"(1, 8)"
+Potato_Late_blight__0450570b-44d1-4290-956d-5d970164a2e2___RS_LB 5160.JPG,ok,3,Potato_Late_Blight,马铃薯晚疫病,1.000000,3:Potato_Late_Blight:1.000000 | 6:Tomato_Late_Blight:0.000000 | 4:Potato_Healthy:0.000000,"(1, 8)"
+Tomato_Early_blight__01861c93-ea8b-4820-aaa8-cc6003b3e75b___RS_Erly.B 7855.JPG,ok,5,Tomato_Early_Blight,番茄早疫病,1.000000,5:Tomato_Early_Blight:1.000000 | 0:Pepper_Bell_Bacterial_Spot:0.000000 | 2:Potato_Early_Blight:0.000000,"(1, 8)"
+Tomato_healthy__02b4afdf-e1de-4c0e-a38d-3f19afeb9ea9___RS_HL 0493.JPG,ok,7,Tomato_Healthy,健康番茄叶,0.999805,7:Tomato_Healthy:0.999805 | 5:Tomato_Early_Blight:0.000195 | 6:Tomato_Late_Blight:0.000000,"(1, 8)"
+Tomato_Late_blight__013f987a-9371-4763-a104-ea6f326e584b___GHLB2 Leaf 8556.JPG,ok,6,Tomato_Late_Blight,番茄晚疫病,1.000000,6:Tomato_Late_Blight:1.000000 | 7:Tomato_Healthy:0.000000 | 3:Potato_Late_Blight:0.000000,"(1, 8)"

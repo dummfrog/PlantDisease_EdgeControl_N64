@@ -1,0 +1,8 @@
+0 Pepper_Bell_Bacterial_Spot
+1 Pepper_Bell_Healthy
+2 Potato_Early_Blight
+3 Potato_Late_Blight
+4 Potato_Healthy
+5 Tomato_Early_Blight
+6 Tomato_Late_Blight
+7 Tomato_Healthy

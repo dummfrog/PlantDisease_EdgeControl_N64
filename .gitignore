@@ -1,0 +1,50 @@
+# secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*service_role*
+*access_token*
+*device_token*
+*hmac_secret*
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Supabase local
+.supabase/
+supabase/.branches/
+supabase/.temp/
+
+# Logs and caches
+logs/
+*.log
+.cache/
+tmp/
+temp/
+
+# ML large outputs
+runs/
+datasets/
+*.weights
+*.engine
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

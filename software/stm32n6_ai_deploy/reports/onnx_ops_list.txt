@@ -1,0 +1,14 @@
+Add: 9
+Concat: 7
+Constant: 9
+Conv: 39
+Flatten: 1
+Gemm: 1
+GlobalAveragePool: 1
+MatMul: 2
+Mul: 36
+Reshape: 3
+Sigmoid: 35
+Softmax: 2
+Split: 6
+Transpose: 2
